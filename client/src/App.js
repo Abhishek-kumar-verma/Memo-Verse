@@ -1,41 +1,23 @@
-import React, { useEffect } from 'react'
-import { Container , AppBar , Typography , Grow , Grid } from '@material-ui/core';
-import { useDispatch } from 'react-redux';
-import { getPosts } from './actions/posts'
-import  memoVerse from './images/finallogo.jpg';
-import Posts from './components/Posts/Posts';
-import Form from './components/Form/Form';
-import useStyles from "./styles";
+import React from "react";
+import { BrowserRouter,  Route, Routes } from "react-router-dom";
+import { Container } from "@material-ui/core";
+
+import Navbar from "./components/Navbar/Navbar";
+import Home from "./components/Home/Home";
+import Auth from "./components/Auth/Auth";
 const App = () => {
-  const classes = useStyles();
-  const dispatch = useDispatch();
-
-  useEffect(()=>{
-    dispatch(getPosts());
-  },[dispatch]);
-
   return (
-    <Container maxWidth='lg'>
-      <AppBar className={classes.appBar} position='static' color='inherit'>
-          <Typography className={classes.heading} variant="h2" align="center">
-            MemoVerse
-          </Typography>
-          <img className={classes.image} src={memoVerse} alt="Memo-Verse" height="60"/>
-      </AppBar>
-      <Grow in>
-        <Container>
-          <Grid container justifyContent="space-between" alignItems="stretch" spacing={3}>
-            <Grid item xs={12} sm={7}>
-              <Posts />
-            </Grid>
-            <Grid item xs={12} sm={4}> 
-              <Form />
-            </Grid>
-          </Grid>
-        </Container>
-      </Grow>
-    </Container>
-  )
-}
+    <BrowserRouter>
+      <Container maxWidth="lg" >
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} exact/>
+          <Route path="/auth" element={<Auth />} exact/>
+        </Routes>
+        
+      </Container>
+    </BrowserRouter>
+  );
+};
 
-export default App
+export default App;

@@ -8,37 +8,46 @@ import {
   Avatar,
 } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-// import { GoogleLogin } from "react-google-login";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
+import { signin , signup } from "../../actions/auth";
 import Input from "./input";
 import Icon from "./Icon";
 import useStyles from "./styles";
+const initialState = { firstName :"" , lastName:"", email:"" , password:"", confirmPassword:""}
+
 const Auth = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [isSignup, setIsSignup] = useState(false);
+  const [ formData , setFormData] = useState(initialState);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  console.log(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+  
   const handleShowPassword = () => setShowPassword(!showPassword);
+
   const switchMode = () => {
     setIsSignup(!isSignup);
-    handleShowPassword(false);
+    setShowPassword(false);
   };
-  const handleSumbit = () => {};
-  const handleChange = () => {};
+  const handleSumbit = (e) => {
+    e.preventDefault();
+    if( isSignup){
+      dispatch( signup( formData , navigate));
+    }else{
+      dispatch( signin(formData , navigate));
+    }
+  };
+  const handleChange = (e) => {
+    setFormData({ ...formData ,[e.target.name] : e.target.value})
+  };
 
   const googleSuccess = async (res) => {
-    console.log(res);
-    // const result = res?.profileObj;
     const token = res?.clientId;
     const result = jwt_decode(res.credential);
-    console.log(token);
-
     try {
       dispatch({ type: "AUTH", data: { result, token } });
       navigate("/")
@@ -46,11 +55,7 @@ const Auth = () => {
       console.log(error);
     }
   };
-  const googleFailure = (error) => {
-    console.log(error);
-    console.log("google sign in unsuccesfull. Try Again Later");
-  };
-
+  
   return (
     <Container component="main" maxWidth="xs">
       <Paper className={classes.paper} elevation={3}>
@@ -110,25 +115,6 @@ const Auth = () => {
             {isSignup ? "Sign Up" : "Sign In"}
           </Button>
           <GoogleOAuthProvider clientId={ process.env.REACT_APP_GOOGLE_CLIENT_ID }>
-            {/* <GoogleLogin
-                children={
-                  <Button
-                    className={classes.googleButton}
-                    color="primary"
-                    fullWidth
-                    // onClick={renderProps.onClick}
-                    // disabled={renderProps.disabled}
-                    startIcon={<Icon />}
-                    variant="contained"
-                  >
-                    Google Sign In
-                  </Button>
-                }
-              onSuccess={googleSuccess}
-              onError={() => {
-                console.log("Login Failed");
-              }}
-            /> */}
             <GoogleLogin
               children={(renderProps) => (
                 <Button
@@ -149,26 +135,6 @@ const Auth = () => {
               }}
             />
           </GoogleOAuthProvider>
-
-          {/* <GoogleLogin
-            clientId=
-            render={(renderProps) => (
-              <Button
-                className={classes.googleButton}
-                color="primary"
-                fullWidth
-                onClick={renderProps.onClick}
-                disabled={renderProps.disabled}
-                startIcon={<Icon />}
-                variant="contained"
-              >
-                Google Sign In
-              </Button>
-            )}
-            onSuccess={googleSuccess}
-            onError={googleFailure}
-            cookiePolicy="single_host_origin"
-          /> */}
           <Grid container justifyContent="flex-end">
             <Grid item>
               <Button onClick={switchMode}>

@@ -5,21 +5,22 @@ import { TextField, Button, Typography, Paper } from "@material-ui/core";
 
 import useStyles from "./styles";
 import { createPost, updatePost } from "../../actions/posts";
+import { useNavigate } from "react-router-dom";
 
 const Form = ({ currentId, setCurrentId }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const post = useSelector((state) =>
-    currentId ? state.posts.find((p) => p._id === currentId) : null
+    currentId ? state.posts.posts.find((p) => p._id === currentId) : null
   );
   const [postData, setPostData] = useState({
-    creator: " ",
     title: " ",
     message: " ",
     tags: " ",
     selectedFile: null,
   });
-
+  const user = JSON.parse(localStorage.getItem('profile'));
   useEffect(() => {
     if (post) setPostData(post);
   }, [post]);
@@ -27,9 +28,9 @@ const Form = ({ currentId, setCurrentId }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (currentId !== 0) {
-      dispatch(updatePost(currentId, postData));
+      dispatch(updatePost(currentId,{ ...postData , name : user?.result?.name}));
     } else {
-      dispatch(createPost(postData));
+      dispatch(createPost({ ...postData , name : user?.result?.name}, navigate ));
     }
     clear();
   };
@@ -37,7 +38,6 @@ const Form = ({ currentId, setCurrentId }) => {
   const clear = () => {
     setCurrentId(0);
     setPostData({
-      creator: " ",
       title: " ",
       message: " ",
       tags: " ",
@@ -45,9 +45,17 @@ const Form = ({ currentId, setCurrentId }) => {
     });
 
   };
-
+  if( !user?.result?.name){
+    return (
+      <Paper className={classes.paper} raised elevation={6}>
+        <Typography variant="h5" align="center" >
+          Please Sign in to create own memories and like other's memories
+        </Typography>
+      </Paper>
+    );
+  }
   return (
-    <Paper className={classes.paper}>
+    <Paper className={classes.paper} raised elevation={6}>
       <form
         autoComplete="off"
         noValidate
@@ -55,16 +63,6 @@ const Form = ({ currentId, setCurrentId }) => {
         onSubmit={handleSubmit}
       >
         <Typography variant="h6">{ currentId ? 'Editing ' : 'Creating ' } a Memory</Typography>
-        <TextField
-          name="creator"
-          variant="outlined"
-          label="Creator"
-          fullWidth
-          value={postData.creator}
-          onChange={(e) =>
-            setPostData({ ...postData, creator: e.target.value })
-          }
-        />
         <TextField
           name="title"
           variant="outlined"
